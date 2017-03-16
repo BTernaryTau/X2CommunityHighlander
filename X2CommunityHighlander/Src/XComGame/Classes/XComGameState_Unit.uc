@@ -11,7 +11,6 @@
 // LWS Mods: 
 // tracktwo - Clear the loot list when a unit is killed by explosives so the loot doesn't come back
 //            if they get resurrected and killed again.
-// BTernaryTau: Allow overriding of HasAvailablePerksToAssign() output
 class XComGameState_Unit extends XComGameState_BaseObject 
 	implements(X2GameRulesetVisibilityInterface, X2VisualizedInterface, Lootable, UIQueryInterfaceUnit, Damageable, Hackable) 
 	dependson(XComCoverInterface)
@@ -5056,35 +5055,19 @@ function bool HasAvailablePerksToAssign()
 	local int i;
 	local X2SoldierClassTemplate ClassTemplate;
 	local array<SoldierClassAbilityType> AbilityTree;
-	local XComLWTuple Tuple;
-	local bool bCanAssignPerks;
-
-	// Mod Hook for Issue #33 Start
-	// BTernaryTau: Allow overriding of HasAvailablePerksToAssign() output
-	bCanAssignPerks = true;
 
 	if(m_SoldierRank == 0 || m_SoldierClassTemplateName == '' || m_SoldierClassTemplateName == 'PsiOperative')
-		bCanAssignPerks = false;
+		return false;
 
 	ClassTemplate = GetSoldierClassTemplate();
 	AbilityTree = ClassTemplate.GetAbilityTree(m_SoldierRank - 1);
 	for(i = 0; i < AbilityTree.Length; ++i)
 	{
 		if(HasSoldierAbility(AbilityTree[i].AbilityName))
-			bCanAssignPerks = false;
+			return false;
 	}
 
-	Tuple = new class'XComLWTuple';
-	Tuple.Id = 'HasAvailablePerksToAssign';
-	Tuple.Data.Add(2);
-	Tuple.Data[0].Kind = XComLWTVObject;
-	Tuple.Data[0].o = self;
-	Tuple.Data[1].Kind = XComLWTVBool;
-	Tuple.Data[1].b = bCanAssignPerks;
-	`XEVENTMGR.TriggerEvent('HasAvailablePerksToAssign', Tuple, none, none);
-
-	return Tuple.Data[1].b;
-	// End Hook for Issue #33
+	return true;
 }
 
 function EnableGlobalAbilityForUnit(name AbilityName)
