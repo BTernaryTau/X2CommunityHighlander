@@ -19,24 +19,32 @@ struct ProjectileSoundMapping
 // The list of mission types to enable the radius manager to display rescue rings.
 var config const array<string> RadiusManagerMissionTypes;       
 
+// Issue #125
 // If true, enable the yellow alert movement system.
 var config const bool EnableYellowAlert;
 
+// Issue #75
 // If true, hide havens on the geoscape
 var config const bool HideHavens;
 
+// Variable for Issue #52
 // If true, encounter zones will not be updated based XCOM's current position.
 var config bool DisableDynamicEncounterZones;
 
+// Start Issue #53
 var config bool EnableAvengerCameraSpeedControl;
 var config float AvengerCameraSpeedControlModifier;
+// End Issue #53
 
 // The radius (in meters) for which a civilian noise alert can be heard.
 var config int NoiseAlertSoundRange;
 
+// Start Issue #147
 // Enable/disable the use of the 'Yell' ability before every civilian BT evaluation. Enabled by default.
 var config bool EnableCivilianYellOnPreMove;
+// End Issue #147
 
+// Start Issue #122
 // If this flag is set, units in yellow alert will not peek around cover to determine LoS - similar to green units.
 // This is useful when yellow alert is enabled because you can be in a situation where a soldier is only a single tile
 // out of LoS from a green unit, and that neighboring tile that they would have LoS from is the tile they will use to
@@ -45,11 +53,13 @@ var config bool EnableCivilianYellOnPreMove;
 // shoot at another pod you can see from concealment, or a nearby pod activating despite no aliens being in LoS when you 
 // break concealment by hacking an objective (which alerts all pods).
 var config bool NoPeekInYellowAlert;
+// End Issue #122
 
-
+// Start Issue #128
 // this int controls how low the deployable soldier count has to get in order to trigger the low manpower warning
 // if it is not set (at 0), then the game will default to GetMaxSoldiersAllowedOnMission
 var config int LowStrengthTriggerCount;
+// End Issue #128
 
 // Start Issue #24
 // these variables control various world effects, to prevent additional voxel check that can cause mismatch between preview and effect
@@ -58,17 +68,22 @@ var config bool bWorldSmokeShouldDisableExtraLOSCheck;
 var config bool bWorldSmokeGrenadeShouldDisableExtraLOSCheck;
 // End Issue #24
 
+// Start Issue #48
 // This is to double check in grenade targeting that the affected unit is actually in a tile that will get the world effect, not just that it is occupying such a tile.
 // This can occur because tiles are only 1 meter high, so many unit occupy multiple vertical tiles, but only really count as occupying the one at their feet in other places.
 var config array<name> GrenadeRequiresWorldEffectToAffectUnit;
+// End Issue #48
 
 // Returns 'true' if the given mission type should enable the radius manager (e.g. the thingy
 // that controls rescue rings on civvies). This is done through a config var that lists the 
 // desired mission types for extensibility.
 
+// Start Issue #176
 var config bool EnableRestartMissionButtonInNonIronman;
 var config bool EnableRestartMissionButtonInIronman;
+// End Issue #176
 
+// Start Issue #49
 // A list of replacement projectile sound effects mapping a projectile element to a sound cue name.
 // The 'ProjectileName' must be of the form ProjectileName_Index where ProjectileName is the name of the
 // projectile archetype, and Index is the index into the projectile array for the element that should have
@@ -81,14 +96,16 @@ var config bool EnableRestartMissionButtonInIronman;
 // The fire or death sound is the name of a sound cue loaded into the sound manager system. See the SoundCuePaths
 // array in XComSoundManager.
 var config array<ProjectileSoundMapping> ProjectileSounds;
+// End Issue #49
 
+// Start Issue #197
+//This is referenced in XCGS_Unit and must be true to run some code that ensures a powerful psi ability can be trained
+var config bool EnablePsiTreeOrganization;
+// End Issue #197
+
+// Start Issue #130
 //allow certain classes to be overridden recursively, so the override can be overridden
 var config array<ModClassOverrideEntry> UIDynamicClassOverrides;
-
-//Configuration array to control how much damage fire does when it finishes burning
-// This is indexed by the number of turns it has been burning, which is typically 1 to 3,
-// but can be longer if the environment actor was configured with Toughness.AvailableFireFuelTurns
-var config array<int> FireEnvironmentDamageAfterNumTurns;
 
 simulated static function class<object> LWCheckForRecursiveOverride(class<object> ClassToCheck)
 {
@@ -119,6 +136,7 @@ simulated static function class<object> LWCheckForRecursiveOverride(class<object
 	`LOG("LWCheckForRecursiveOverride : Overrode " $ string(ClassToCheck) $ " to " $ CurrentBestClass);
 	return CurrentBestClass;
 }
+// End Issue #130
 
 // Start Issue #26 - allow radius manager to be usable on more than just 'Terror' missions
 static function bool ShouldUseRadiusManagerForMission(String MissionName)
@@ -127,15 +145,20 @@ static function bool ShouldUseRadiusManagerForMission(String MissionName)
 }
 // End Issue #26
 
+// Start Issue #125
 static function bool YellowAlertEnabled()
 {
     return default.EnableYellowAlert;
 }
+// End Issue #125
 
+// Start Issue #52
+// Disable the line of play based on local config
 static function bool DynamicEncounterZonesDisabled()
 {
 	return default.DisableDynamicEncounterZones;
 }
+// End Issue #52
 
 // Dependant Issues - Issue #21 (configurable sound range for DoNoiseAlert)
 // Copied from XComGameState_Unit::GetEnemiesInRange, except will retrieve all units on the alien team within
@@ -174,6 +197,9 @@ static function GetAlienUnitsInRange(TTile kLocation, int nMeters, out array<Sta
 	}
 }
 
+
+// Start Issue #49
+// Used by hooks added to X2UnifiedProjectile
 function static SoundCue FindFireSound(String ObjectArchetypeName, int Index)
 {
 	local String strKey;
@@ -217,3 +243,4 @@ function static SoundCue FindDeathSound(String ObjectArchetypeName, int Index)
 
 	return none;
 }
+// End Issue #49
